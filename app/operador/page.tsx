@@ -40,67 +40,20 @@ import {
   Zap,
   Bell,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Microscope
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useMockData, type Task } from "@/lib/mock-data"
 
-const availableTasks = [
-  {
-    id: "1",
-    title: "Entrega de documentos",
-    description: "Recoger y entregar sobre en zona norte",
-    location: "Usaquen, Bogota",
-    distance: "2.3 km",
-    payout: 18500,
-    urgency: "normal",
-    icon: FileText,
-    estimatedTime: "25 min",
-  },
-  {
-    id: "2",
-    title: "Verificacion de direccion",
-    description: "Confirmar existencia de local comercial",
-    location: "Chapinero, Bogota",
-    distance: "1.8 km",
-    payout: 25000,
-    urgency: "urgent",
-    icon: Search,
-    estimatedTime: "20 min",
-  },
-  {
-    id: "3",
-    title: "Fotografia de producto",
-    description: "Tomar fotos de inventario en bodega",
-    location: "Fontibon, Bogota",
-    distance: "5.2 km",
-    payout: 45000,
-    urgency: "normal",
-    icon: Camera,
-    estimatedTime: "45 min",
-  },
-  {
-    id: "4",
-    title: "Entrega express",
-    description: "Llevar paquete pequeno urgente",
-    location: "Zona T, Bogota",
-    distance: "3.1 km",
-    payout: 32000,
-    urgency: "urgent",
-    icon: Package,
-    estimatedTime: "30 min",
-  },
-  {
-    id: "5",
-    title: "Acompanamiento",
-    description: "Acompanar a persona mayor a cita medica",
-    location: "Cedritos, Bogota",
-    distance: "4.5 km",
-    payout: 55000,
-    urgency: "normal",
-    icon: Users,
-    estimatedTime: "90 min",
-  },
-]
+const taskTypeIcons: Record<Task["type"], React.ComponentType<{ className?: string }>> = {
+  entrega: Package,
+  verificacion: Search,
+  fotografia: Camera,
+  documentos: FileText,
+  acompanamiento: Users,
+  investigacion: Microscope
+}
 
 const mapPins = [
   { x: 25, y: 30, active: true },
@@ -138,9 +91,28 @@ const mockNotifications = [
 ]
 
 export default function OperadorDashboard() {
+  const { tasks, currentOperator } = useMockData()
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTask, setSelectedTask] = useState<string | null>(null)
   const [notifications, setNotifications] = useState(3)
+
+  // Get available tasks (pending or created tasks that aren't assigned yet)
+  const availableTasks = tasks.filter(t => 
+    ["created", "pending", "assigning"].includes(t.status) && !t.operatorId
+  ).map(task => {
+    const IconComponent = taskTypeIcons[task.type] || Package
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      location: `${task.location}, Bogota`,
+      distance: `${(Math.random() * 5 + 1).toFixed(1)} km`,
+      payout: task.payout,
+      urgency: task.priority === "urgente" ? "urgent" : "normal",
+      icon: IconComponent,
+      estimatedTime: task.estimatedTime,
+    }
+  })
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1200)
