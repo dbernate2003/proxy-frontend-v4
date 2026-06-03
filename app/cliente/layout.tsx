@@ -6,6 +6,14 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ProxyLogo } from "@/components/proxy-logo"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { 
   LayoutDashboard, 
@@ -18,7 +26,10 @@ import {
   Settings,
   Bell,
   ChevronLeft,
-  Menu
+  Menu,
+  CheckCircle,
+  Clock,
+  AlertCircle
 } from "lucide-react"
 
 const sidebarItems = [
@@ -30,6 +41,33 @@ const sidebarItems = [
   { href: "/cliente/facturacion", icon: CreditCard, label: "Facturacion" },
   { href: "/cliente/api-keys", icon: Key, label: "API Keys" },
   { href: "/cliente/configuracion", icon: Settings, label: "Configuracion" },
+]
+
+const mockNotifications = [
+  {
+    id: "1",
+    type: "success",
+    title: "Tarea completada",
+    message: "TASK-001 ha sido completada exitosamente",
+    time: "Hace 5 min",
+    read: false
+  },
+  {
+    id: "2", 
+    type: "info",
+    title: "Operador asignado",
+    message: "Carlos Martinez asignado a TASK-002",
+    time: "Hace 15 min",
+    read: false
+  },
+  {
+    id: "3",
+    type: "warning",
+    title: "Tarea en revision",
+    message: "TASK-003 requiere verificacion adicional",
+    time: "Hace 1 hora",
+    read: true
+  }
 ]
 
 export default function ClienteLayout({
@@ -178,14 +216,51 @@ export default function ClienteLayout({
               <CreditCard className="w-3.5 h-3.5 text-primary" />
               <span className="font-medium text-primary">$2,450,000</span>
             </div>
-            <Button variant="ghost" size="icon" className="relative w-8 h-8">
-              <Bell className="w-4 h-4" />
-              {notifications > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-destructive text-[9px] text-white flex items-center justify-center">
-                  {notifications}
-                </span>
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative w-8 h-8">
+                  <Bell className="w-4 h-4" />
+                  {notifications > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-destructive text-[9px] text-white flex items-center justify-center">
+                      {notifications}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel className="flex items-center justify-between">
+                  <span>Notificaciones</span>
+                  <span className="text-xs text-muted-foreground font-normal">{mockNotifications.filter(n => !n.read).length} sin leer</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {mockNotifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id} className="flex gap-3 p-3 cursor-pointer">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                      notification.type === "success" && "bg-emerald-500/10",
+                      notification.type === "info" && "bg-primary/10",
+                      notification.type === "warning" && "bg-amber-500/10"
+                    )}>
+                      {notification.type === "success" && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                      {notification.type === "info" && <Clock className="w-4 h-4 text-primary" />}
+                      {notification.type === "warning" && <AlertCircle className="w-4 h-4 text-amber-500" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-medium", !notification.read && "text-foreground")}>{notification.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{notification.message}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{notification.time}</p>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="justify-center text-primary text-sm cursor-pointer">
+                  Ver todas las notificaciones
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

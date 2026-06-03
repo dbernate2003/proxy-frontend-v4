@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,16 +17,64 @@ import {
   Mail,
   Phone,
   MapPin,
-  Save
+  Save,
+  Check,
+  Loader2
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function ConfiguracionPage() {
+  // Company info state
+  const [companyName, setCompanyName] = useState("Empresa Demo S.A.S")
+  const [nit, setNit] = useState("900.123.456-7")
+  const [industry, setIndustry] = useState("Tecnologia")
+  const [size, setSize] = useState("50-100 empleados")
+  
+  // Contact info state
+  const [contactName, setContactName] = useState("Juan Perez")
+  const [role, setRole] = useState("Director de Operaciones")
+  const [email, setEmail] = useState("juan.perez@empresademo.com")
+  const [phone, setPhone] = useState("+57 315 123 4567")
+  const [address, setAddress] = useState("Cra 7 #71-21, Torre A, Oficina 1502, Bogota")
+  
+  // Notification settings
+  const [emailNotifications, setEmailNotifications] = useState(true)
+  const [taskCompleted, setTaskCompleted] = useState(true)
+  const [problemAlerts, setProblemAlerts] = useState(true)
+  const [weeklySummary, setWeeklySummary] = useState(false)
+  
+  // Save state
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    setSaved(false)
+    
+    // Simulate save operation
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    setIsSaving(false)
+    setSaved(true)
+    
+    // Reset saved indicator after 3 seconds
+    setTimeout(() => setSaved(false), 3000)
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Configuración</h1>
-        <p className="text-muted-foreground">Gestiona la configuración de tu cuenta y empresa</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Configuracion</h1>
+          <p className="text-muted-foreground">Gestiona la configuracion de tu cuenta y empresa</p>
+        </div>
+        {saved && (
+          <div className="flex items-center gap-2 text-emerald-500 text-sm">
+            <Check className="w-4 h-4" />
+            Guardado exitosamente
+          </div>
+        )}
       </div>
 
       {/* Company info */}
@@ -33,10 +82,10 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Building2 className="w-5 h-5 text-primary" />
-            Información de la empresa
+            Informacion de la empresa
           </CardTitle>
           <CardDescription>
-            Datos básicos de tu organización
+            Datos basicos de tu organizacion
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -53,7 +102,8 @@ export default function ConfiguracionPage() {
               <Label htmlFor="company">Nombre de la empresa</Label>
               <Input 
                 id="company" 
-                defaultValue="Empresa Demo S.A.S"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -61,7 +111,8 @@ export default function ConfiguracionPage() {
               <Label htmlFor="nit">NIT</Label>
               <Input 
                 id="nit" 
-                defaultValue="900.123.456-7"
+                value={nit}
+                onChange={(e) => setNit(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -69,15 +120,17 @@ export default function ConfiguracionPage() {
               <Label htmlFor="industry">Industria</Label>
               <Input 
                 id="industry" 
-                defaultValue="Tecnología"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="size">Tamaño</Label>
+              <Label htmlFor="size">Tamano</Label>
               <Input 
                 id="size" 
-                defaultValue="50-100 empleados"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -90,7 +143,7 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <User className="w-5 h-5 text-primary" />
-            Información de contacto
+            Informacion de contacto
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -99,7 +152,8 @@ export default function ConfiguracionPage() {
               <Label htmlFor="contact-name">Nombre del contacto</Label>
               <Input 
                 id="contact-name" 
-                defaultValue="Juan Pérez"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -107,7 +161,8 @@ export default function ConfiguracionPage() {
               <Label htmlFor="role">Cargo</Label>
               <Input 
                 id="role" 
-                defaultValue="Director de Operaciones"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -119,30 +174,33 @@ export default function ConfiguracionPage() {
               <Input 
                 id="email" 
                 type="email"
-                defaultValue="juan.perez@empresademo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                Teléfono
+                Telefono
               </Label>
               <Input 
                 id="phone" 
                 type="tel"
-                defaultValue="+57 315 123 4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="address" className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Dirección
+                Direccion
               </Label>
               <Input 
                 id="address" 
-                defaultValue="Cra 7 #71-21, Torre A, Oficina 1502, Bogotá"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 className="bg-secondary border-0"
               />
             </div>
@@ -158,7 +216,7 @@ export default function ConfiguracionPage() {
             Notificaciones
           </CardTitle>
           <CardDescription>
-            Configura cómo quieres recibir alertas y actualizaciones
+            Configura como quieres recibir alertas y actualizaciones
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -169,27 +227,36 @@ export default function ConfiguracionPage() {
                 Recibe actualizaciones sobre tus tareas por correo
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch 
+              checked={emailNotifications} 
+              onCheckedChange={setEmailNotifications}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Alertas de tarea completada</p>
               <p className="text-sm text-muted-foreground">
-                Notificación inmediata cuando una tarea se completa
+                Notificacion inmediata cuando una tarea se completa
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch 
+              checked={taskCompleted} 
+              onCheckedChange={setTaskCompleted}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Alertas de problemas</p>
               <p className="text-sm text-muted-foreground">
-                Notificación cuando hay un problema con una tarea
+                Notificacion cuando hay un problema con una tarea
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch 
+              checked={problemAlerts} 
+              onCheckedChange={setProblemAlerts}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -199,7 +266,10 @@ export default function ConfiguracionPage() {
                 Reporte semanal de actividad por email
               </p>
             </div>
-            <Switch />
+            <Switch 
+              checked={weeklySummary} 
+              onCheckedChange={setWeeklySummary}
+            />
           </div>
         </CardContent>
       </Card>
@@ -215,7 +285,7 @@ export default function ConfiguracionPage() {
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Autenticación de dos factores</p>
+              <p className="font-medium">Autenticacion de dos factores</p>
               <p className="text-sm text-muted-foreground">
                 Agrega una capa adicional de seguridad a tu cuenta
               </p>
@@ -225,9 +295,9 @@ export default function ConfiguracionPage() {
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Cambiar contraseña</p>
+              <p className="font-medium">Cambiar contrasena</p>
               <p className="text-sm text-muted-foreground">
-                Última actualización hace 45 días
+                Ultima actualizacion hace 45 dias
               </p>
             </div>
             <Button variant="outline" size="sm">Cambiar</Button>
@@ -247,9 +317,31 @@ export default function ConfiguracionPage() {
 
       {/* Save button */}
       <div className="flex justify-end">
-        <Button size="lg">
-          <Save className="w-4 h-4 mr-2" />
-          Guardar cambios
+        <Button 
+          size="lg" 
+          onClick={handleSave}
+          disabled={isSaving}
+          className={cn(
+            "min-w-[180px]",
+            saved && "bg-emerald-500 hover:bg-emerald-600"
+          )}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Guardando...
+            </>
+          ) : saved ? (
+            <>
+              <Check className="w-4 h-4 mr-2" />
+              Guardado
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Guardar cambios
+            </>
+          )}
         </Button>
       </div>
     </div>

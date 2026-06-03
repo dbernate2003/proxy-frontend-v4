@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { MapPlaceholder } from "@/components/map-placeholder"
+import { useMockData, type Task } from "@/lib/mock-data"
 import { 
   Package, 
   Search, 
@@ -48,10 +49,20 @@ const evidenceOptions = [
 
 export default function NuevaTareaPage() {
   const router = useRouter()
-  const [taskType, setTaskType] = useState("")
-  const [priority, setPriority] = useState("normal")
+  const { addTask } = useMockData()
+  const [taskType, setTaskType] = useState<Task["type"] | "">("")
+  const [priority, setPriority] = useState<Task["priority"]>("normal")
   const [selectedEvidence, setSelectedEvidence] = useState<string[]>(["photos"])
-  const [estimatedCost, setEstimatedCost] = useState(25000)
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [address, setAddress] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const baseCost = 20000
+  const typeCost = taskType ? 5000 : 0
+  const evidenceCost = selectedEvidence.length * 2000
+  const priorityMultiplier = priority === "urgente" ? 1.5 : 1
+  const estimatedCost = Math.round((baseCost + typeCost + evidenceCost) * priorityMultiplier)
 
   const handleEvidenceChange = (evidenceId: string, checked: boolean) => {
     if (checked) {
@@ -63,7 +74,27 @@ export default function NuevaTareaPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.push("/cliente/tareas-activas")
+    if (!title || !taskType || !address) return
+    
+    setIsSubmitting(true)
+    
+    // Create the task using mock data context
+    addTask({
+      title,
+      description,
+      type: taskType as Task["type"],
+      location: address.split(",")[0] || "Bogota",
+      address,
+      payout: estimatedCost,
+      estimatedTime: priority === "urgente" ? "15-25 min" : "30-45 min",
+      priority,
+      clientId: "client-1",
+    })
+    
+    // Navigate to active tasks
+    setTimeout(() => {
+      router.push("/cliente/tareas-activas")
+    }, 500)
   }
 
   return (
@@ -89,6 +120,9 @@ export default function NuevaTareaPage() {
                     id="title" 
                     placeholder="Ej: Entrega de documentos en Usaquén"
                     className="bg-secondary border-0"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
                   />
                 </div>
 
@@ -98,12 +132,14 @@ export default function NuevaTareaPage() {
                     id="description" 
                     placeholder="Describe qué necesitas que haga el operador, incluyendo instrucciones específicas..."
                     className="bg-secondary border-0 min-h-[120px]"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Tipo de tarea</Label>
-                  <Select value={taskType} onValueChange={setTaskType}>
+                  <Select value={taskType} onValueChange={(val) => setTaskType(val as Task["type"])}>
                     <SelectTrigger className="bg-secondary border-0">
                       <SelectValue placeholder="Selecciona el tipo de tarea" />
                     </SelectTrigger>
@@ -122,7 +158,7 @@ export default function NuevaTareaPage() {
 
                 <div className="space-y-2">
                   <Label>Prioridad</Label>
-                  <Select value={priority} onValueChange={setPriority}>
+                  <Select value={priority} onValueChange={(val) => setPriority(val as Task["priority"])}>
                     <SelectTrigger className="bg-secondary border-0">
                       <SelectValue />
                     </SelectTrigger>
@@ -203,6 +239,9 @@ export default function NuevaTareaPage() {
                     id="address" 
                     placeholder="Cra 7 #116-50, Bogotá"
                     className="bg-secondary border-0"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
                   />
                 </div>
                 <MapPlaceholder 
@@ -247,7 +286,7 @@ export default function NuevaTareaPage() {
                     <div className="flex justify-between">
                       <span className="font-semibold">Total</span>
                       <span className="text-2xl font-bold text-primary">
-                        ${(priority === "urgente" ? estimatedCost * 1.5 : estimatedCost + selectedEvidence.length * 2000).toLocaleString("es-CO")} COP
+                        ${estimatedCost.toLocaleString("es-CO")} COP
                       </span>
                     </div>
                   </div>
@@ -255,9 +294,9 @@ export default function NuevaTareaPage() {
               </CardContent>
             </Card>
 
-            <Button type="submit" className="w-full h-12 text-base">
+            <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting || !title || !taskType || !address}>
               <Send className="w-5 h-5 mr-2" />
-              Publicar Tarea
+              {isSubmitting ? "Publicando..." : "Publicar Tarea"}
             </Button>
           </div>
         </div>

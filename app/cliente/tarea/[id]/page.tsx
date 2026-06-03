@@ -156,7 +156,18 @@ export default function TaskTrackingPage() {
     <PageTransition className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => {
+            // Try to go back, fallback to tareas-activas
+            if (window.history.length > 1) {
+              router.back()
+            } else {
+              router.push("/cliente/tareas-activas")
+            }
+          }}
+        >
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex-1">

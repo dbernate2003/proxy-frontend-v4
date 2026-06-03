@@ -8,6 +8,14 @@ import { StatusBadge } from "@/components/status-badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { 
   FadeIn, 
   StaggerContainer, 
@@ -30,8 +38,11 @@ import {
   DollarSign,
   ChevronRight,
   Zap,
-  Bell
+  Bell,
+  CheckCircle,
+  AlertCircle
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const availableTasks = [
   {
@@ -97,6 +108,33 @@ const mapPins = [
   { x: 70, y: 25, active: false },
   { x: 60, y: 60, active: true },
   { x: 30, y: 70, active: false },
+]
+
+const mockNotifications = [
+  {
+    id: "1",
+    type: "success",
+    title: "Tarea completada",
+    message: "TASK-008 completada exitosamente. +$25,000",
+    time: "Hace 10 min",
+    read: false
+  },
+  {
+    id: "2",
+    type: "info",
+    title: "Nueva tarea urgente",
+    message: "Tarea de entrega express disponible cerca de ti",
+    time: "Hace 25 min",
+    read: false
+  },
+  {
+    id: "3",
+    type: "warning",
+    title: "Verificacion pendiente",
+    message: "Completa tu verificacion para acceder a mas tareas",
+    time: "Hace 2 horas",
+    read: true
+  }
 ]
 
 export default function OperadorDashboard() {
@@ -169,25 +207,62 @@ export default function OperadorDashboard() {
           </motion.div>
           
           <div className="flex items-center gap-2">
-            <motion.div 
-              className="relative"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
-                {notifications > 0 && (
-                  <motion.span
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center text-destructive-foreground"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500 }}
-                  >
-                    {notifications}
-                  </motion.span>
-                )}
-              </Button>
-            </motion.div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.div 
+                  className="relative"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="w-5 h-5" />
+                    {notifications > 0 && (
+                      <motion.span
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center text-destructive-foreground"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500 }}
+                      >
+                        {notifications}
+                      </motion.span>
+                    )}
+                  </Button>
+                </motion.div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72">
+                <DropdownMenuLabel className="flex items-center justify-between">
+                  <span>Notificaciones</span>
+                  <span className="text-xs text-muted-foreground font-normal">{mockNotifications.filter(n => !n.read).length} sin leer</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {mockNotifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id} className="flex gap-3 p-3 cursor-pointer">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                      notification.type === "success" && "bg-emerald-500/10",
+                      notification.type === "info" && "bg-primary/10",
+                      notification.type === "warning" && "bg-amber-500/10"
+                    )}>
+                      {notification.type === "success" && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                      {notification.type === "info" && <Clock className="w-4 h-4 text-primary" />}
+                      {notification.type === "warning" && <AlertCircle className="w-4 h-4 text-amber-500" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-medium", !notification.read && "text-foreground")}>{notification.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">{notification.message}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{notification.time}</p>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="justify-center text-primary text-sm cursor-pointer">
+                  Ver todas
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <StatusBadge status="active">Nivel 3</StatusBadge>
           </div>
         </div>
