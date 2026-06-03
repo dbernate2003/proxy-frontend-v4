@@ -306,6 +306,12 @@ interface MockDataContextType {
   revokeApiKey: (id: string) => void
   regenerateApiKey: (id: string) => ApiKey | undefined
   
+  // Reviews
+  reviews: Review[]
+  addReview: (review: Omit<Review, "id" | "createdAt">) => Review
+  getReviewsByOperator: (operatorId: string) => Review[]
+  getOperatorStats: (operatorId: string) => { avgRating: number; totalReviews: number; categories: { punctuality: number; quality: number; communication: number; professionalism: number } }
+  
   // Simulation
   simulationEvents: SimulationEvent[]
   addSimulationEvent: (event: Omit<SimulationEvent, "id" | "timestamp">) => void
@@ -322,6 +328,77 @@ export interface SimulationEvent {
   timestamp: string
 }
 
+export interface Review {
+  id: string
+  taskId: string
+  operatorId: string
+  clientId: string
+  rating: number
+  comment: string
+  categories: {
+    punctuality: number
+    quality: number
+    communication: number
+    professionalism: number
+  }
+  createdAt: string
+  operatorResponse?: string
+}
+
+const initialReviews: Review[] = [
+  {
+    id: "rev-1",
+    taskId: "TASK-001",
+    operatorId: "op-1",
+    clientId: "client-1",
+    rating: 5,
+    comment: "Excelente servicio, muy puntual y profesional. Los documentos llegaron en perfecto estado.",
+    categories: { punctuality: 5, quality: 5, communication: 5, professionalism: 5 },
+    createdAt: "2024-06-25T14:30:00",
+    operatorResponse: "Gracias por su confianza, fue un placer atenderle."
+  },
+  {
+    id: "rev-2",
+    taskId: "TASK-002",
+    operatorId: "op-1",
+    clientId: "client-2",
+    rating: 4,
+    comment: "Buen trabajo en general, aunque tardo un poco mas de lo esperado.",
+    categories: { punctuality: 3, quality: 5, communication: 4, professionalism: 4 },
+    createdAt: "2024-06-20T10:15:00"
+  },
+  {
+    id: "rev-3",
+    taskId: "TASK-003",
+    operatorId: "op-1",
+    clientId: "client-3",
+    rating: 5,
+    comment: "Verificacion muy detallada, exactamente lo que necesitabamos. Recomendado.",
+    categories: { punctuality: 5, quality: 5, communication: 5, professionalism: 5 },
+    createdAt: "2024-06-15T16:45:00"
+  },
+  {
+    id: "rev-4",
+    taskId: "TASK-004",
+    operatorId: "op-2",
+    clientId: "client-1",
+    rating: 5,
+    comment: "Maria fue increible, muy atenta y profesional.",
+    categories: { punctuality: 5, quality: 5, communication: 5, professionalism: 5 },
+    createdAt: "2024-06-18T09:00:00"
+  },
+  {
+    id: "rev-5",
+    taskId: "TASK-005",
+    operatorId: "op-4",
+    clientId: "client-2",
+    rating: 4,
+    comment: "Buena comunicacion durante toda la tarea.",
+    categories: { punctuality: 4, quality: 4, communication: 5, professionalism: 4 },
+    createdAt: "2024-06-22T11:30:00"
+  }
+]
+
 const MockDataContext = createContext<MockDataContextType | undefined>(undefined)
 
 export function MockDataProvider({ children }: { children: ReactNode }) {
@@ -336,6 +413,7 @@ export function MockDataProvider({ children }: { children: ReactNode }) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialApiKeys)
   const [simulationEvents, setSimulationEvents] = useState<SimulationEvent[]>([])
+  const [reviews, setReviews] = useState<Review[]>(initialReviews)
 
   // Task functions
   const addTask = useCallback((taskData: Omit<Task, "id" | "createdAt" | "status" | "progress">) => {
@@ -469,6 +547,40 @@ export function MockDataProvider({ children }: { children: ReactNode }) {
     setSimulationEvents([])
   }, [])
 
+  // Review functions
+  const addReview = useCallback((reviewData: Omit<Review, "id" | "createdAt">) => {
+    const newReview: Review = {
+      ...reviewData,
+      id: `rev-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    }
+    setReviews(prev => [...prev, newReview])
+    return newReview
+  }, [])
+
+  const getReviewsByOperator = useCallback((operatorId: string) => {
+    return reviews.filter(r => r.operatorId === operatorId)
+  }, [reviews])
+
+  const getOperatorStats = useCallback((operatorId: string) => {
+    const operatorReviews = reviews.filter(r => r.operatorId === operatorId)
+    if (operatorReviews.length === 0) {
+      return {
+        avgRating: 0,
+        totalReviews: 0,
+        categories: { punctuality: 0, quality: 0, communication: 0, professionalism: 0 }
+      }
+    }
+    const avgRating = operatorReviews.reduce((sum, r) => sum + r.rating, 0) / operatorReviews.length
+    const categories = {
+      punctuality: operatorReviews.reduce((sum, r) => sum + r.categories.punctuality, 0) / operatorReviews.length,
+      quality: operatorReviews.reduce((sum, r) => sum + r.categories.quality, 0) / operatorReviews.length,
+      communication: operatorReviews.reduce((sum, r) => sum + r.categories.communication, 0) / operatorReviews.length,
+      professionalism: operatorReviews.reduce((sum, r) => sum + r.categories.professionalism, 0) / operatorReviews.length
+    }
+    return { avgRating, totalReviews: operatorReviews.length, categories }
+  }, [reviews])
+
   return (
     <MockDataContext.Provider
       value={{
@@ -494,7 +606,11 @@ export function MockDataProvider({ children }: { children: ReactNode }) {
         regenerateApiKey,
         simulationEvents,
         addSimulationEvent,
-        clearSimulationEvents
+        clearSimulationEvents,
+        reviews,
+        addReview,
+        getReviewsByOperator,
+        getOperatorStats
       }}
     >
       {children}

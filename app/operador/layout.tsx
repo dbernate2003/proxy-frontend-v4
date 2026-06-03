@@ -6,14 +6,13 @@ import { motion } from "framer-motion"
 import { PhoneFrame } from "@/components/phone-frame"
 import { ProxyLogo } from "@/components/proxy-logo"
 import { cn } from "@/lib/utils"
-import { Home, ClipboardList, Wallet, MessageSquare, User, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Home, ClipboardList, Wallet, MessageSquare, User, ArrowLeft, Star } from "lucide-react"
 
 const navItems = [
   { href: "/operador", icon: Home, label: "Inicio" },
   { href: "/operador/tareas", icon: ClipboardList, label: "Tareas" },
+  { href: "/operador/reputacion", icon: Star, label: "Reputacion" },
   { href: "/operador/billetera", icon: Wallet, label: "Billetera" },
-  { href: "/operador/chat", icon: MessageSquare, label: "Chat" },
   { href: "/operador/perfil", icon: User, label: "Perfil" },
 ]
 

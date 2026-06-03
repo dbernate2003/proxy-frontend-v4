@@ -6,7 +6,7 @@ import { ProxyLogo } from "@/components/proxy-logo"
 import { LiveSimulation } from "@/components/live-simulation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Smartphone, Monitor, Shield, Zap, Users, CheckCircle, ArrowRight, Play } from "lucide-react"
+import { Smartphone, Monitor, Shield, Zap, Users, CheckCircle, ArrowRight, Play, Settings } from "lucide-react"
 import { useState } from "react"
 
 const features = [
@@ -55,13 +55,16 @@ export default function LandingPage() {
             <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Caracteristicas
             </Link>
+            <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Admin
+            </Link>
           </nav>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/cliente">Iniciar sesion</Link>
+              <Link href="/auth/login">Iniciar sesion</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/operador/registro">Ser Operador</Link>
+              <Link href="/operador/auth/registro">Ser Operador</Link>
             </Button>
           </div>
         </div>
