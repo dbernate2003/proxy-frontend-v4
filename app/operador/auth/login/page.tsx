@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
 import { ProxyLogo } from "@/components/proxy-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,12 +46,7 @@ export default function OperadorLoginPage() {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+        <div className="w-full max-w-md">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardHeader className="text-center pb-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -170,7 +164,7 @@ export default function OperadorLoginPage() {
               </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </main>
     </div>
   )
